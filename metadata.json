@@ -1,0 +1,6 @@
+{
+  "name": "AgroVani - Voice Farm Assistant",
+  "description": "Voice-enabled agricultural assistant for semi-literate farmers with Solapur dialect NLP, real-time mandi prices, weather, fertilizer calculator, crop disease diagnostics, secure offline sync, and PII protection.",
+  "requestFramePermissions": ["CAMERA", "MICROPHONE"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15803d" />
+      <stop offset="100%" stop-color="#14532d" />
+    </linearGradient>
+    <linearGradient id="sun" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+    <linearGradient id="leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86efac" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+  </defs>
+  <!-- Background with rounded corners for Android icon -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  
+  <!-- Glowing Sun Arc in upper half -->
+  <circle cx="256" cy="210" r="100" fill="url(#sun)" opacity="0.95" />
+  
+  <!-- Left Sprout Leaf -->
+  <path d="M256 340 C170 340 120 250 150 170 C190 220 220 270 256 340 Z" fill="url(#leaf)" />
+  <!-- Right Sprout Leaf -->
+  <path d="M256 340 C342 340 392 250 362 170 C322 220 292 270 256 340 Z" fill="#4ade80" />
+  <!-- Center Sprout Shoot -->
+  <path d="M256 360 C245 280 256 210 256 140 C256 210 267 280 256 360 Z" fill="#bbf7d0" />
+
+  <!-- Farmer Voice Wave / Mic symbol in base -->
+  <circle cx="256" cy="400" r="44" fill="#ffffff" opacity="0.95" />
+  <!-- Mic icon inside circle -->
+  <rect x="250" y="380" width="12" height="24" rx="6" fill="#15803d" />
+  <path d="M242 394 C242 405 270 405 270 394" fill="none" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+  <line x1="256" y1="405" x2="256" y2="414" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+  <line x1="248" y1="414" x2="264" y2="414" stroke="#15803d" stroke-width="3" stroke-linecap="round" />
+</svg>
