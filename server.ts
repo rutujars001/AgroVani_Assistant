@@ -56,18 +56,11 @@ app.post('/api/tts', async (req: Request, res: Response) => {
     const promptText = `मराठी भाषेत अस्खलित, स्पष्ट आणि नैसर्गिक शेतकरी उच्चारणात बोला: ${cleanText}`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash-lite-tts',
+      model: 'gemini-2.5-flash-preview-tts',
       contents: [
         {
           role: 'user',
-          parts: [
-            {
-              text: promptText,
-              speechMetadata: {
-                style: 'Natural rural Marathi speaker from Maharashtra, clear friendly farmer tone',
-              },
-            },
-          ],
+          parts: [{ text: promptText }],
         },
       ],
       config: {

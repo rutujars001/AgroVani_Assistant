@@ -18,10 +18,24 @@ export const CropInfoModule: React.FC<CropInfoModuleProps> = ({
 }) => {
   const [selectedCrop, setSelectedCrop] = useState<CropInfo | null>(() => {
     if (initialCropId) {
-      return CROPS_DATA.find(c => c.id === initialCropId || c.nameMr.includes(initialCropId)) || null;
+      const q = initialCropId.toLowerCase();
+      return CROPS_DATA.find(c =>
+        c.id === initialCropId ||
+        c.nameMr.includes(initialCropId) ||
+        c.nameMr.toLowerCase().includes(q) ||
+        initialCropId.includes(c.nameMr.split(' ')[0]) ||
+        initialCropId.includes(c.nameMr.split(' ')[0])
+      ) || null;
     }
     return null;
   });
+
+  // Auto-speak when a crop is pre-selected via voice
+  React.useEffect(() => {
+    if (selectedCrop) {
+      speechService.speak(selectedCrop.marathiAudioText);
+    }
+  }, []);
 
   const handleSelectCrop = (crop: CropInfo) => {
     speechService.hapticFeedback(30);

@@ -203,7 +203,21 @@ export function parseFarmerQuery(transcript: string): ParsedIntent {
 
   // 6. Crop Info Intent
   const matchedCrop = detectCrop(query);
-  if (matchedCrop || query.includes('पीक') || query.includes('माहिती') || query.includes('पेरणी') || query.includes('वाण')) {
+  if (
+    matchedCrop ||
+    query.includes('पीक') ||
+    query.includes('माहिती') ||
+    query.includes('पेरणी') ||
+    query.includes('वाण') ||
+    query.includes('सांगा') ||
+    query.includes('बद्दल') ||
+    query.includes('बद्दल सांगा') ||
+    query.includes('विषयी') ||
+    query.includes('कसे करावे') ||
+    query.includes('कसं करायचं') ||
+    query.includes('लागवड') ||
+    query.includes('उत्पादन')
+  ) {
     return {
       intent: 'crop_info',
       targetCrop: matchedCrop || 'ज्वारी',
@@ -215,12 +229,16 @@ export function parseFarmerQuery(transcript: string): ParsedIntent {
     };
   }
 
-  // Fallback
+  // Fallback — try to detect crop and open crop info
+  const fallbackCrop = detectCrop(query);
   return {
-    intent: 'crop_info',
+    intent: fallbackCrop ? 'crop_info' : 'crop_info',
+    targetCrop: fallbackCrop,
     confidence: 0.5,
-    confirmationQuestion: `तुम्ही "${transcript}" असे विचारले आहे. पीक माहिती उघडू का?`,
-    suggestedActionTitle: 'कृषी सहाय्यक'
+    confirmationQuestion: fallbackCrop
+      ? `तुम्ही "${transcript}" असे विचारले. ${fallbackCrop} ची माहिती उघडू का?`
+      : `तुम्ही "${transcript}" असे विचारले आहे. पीक माहिती उघडू का?`,
+    suggestedActionTitle: fallbackCrop ? `${fallbackCrop} माहिती` : 'कृषी सहाय्यक'
   };
 }
 
@@ -230,27 +248,36 @@ function detectCrop(text: string): string | undefined {
     'मालदांडी': 'ज्वारी',
     'तूर': 'तूर',
     'तुरी': 'तूर',
+    'तुराची': 'तूर',
     'हरभरा': 'हरभरा',
     'चना': 'हरभरा',
     'कांदा': 'कांदा',
     'कांद्या': 'कांदा',
+    'कांद्याच': 'कांदा',
+    'कांद्यावर': 'कांदा',
     'सोयाबीन': 'सोयाबीन',
     'शेंगदाणा': 'शेंगदाणे',
+    'शेंगदाण्या': 'शेंगदाणे',
     'भुईमूग': 'शेंगदाणे',
     'कापूस': 'कापूस',
     'कपाशी': 'कापूस',
+    'कापसाच': 'कापूस',
     'मका': 'मका',
     'बाजरी': 'बाजरी',
     'ऊस': 'ऊस',
     'उसा': 'ऊस',
+    'उसाच': 'ऊस',
     'टोमॅटो': 'टोमॅटो',
     'टमाटे': 'टोमॅटो',
     'डाळिंब': 'डाळिंब',
     'डाळिंबा': 'डाळिंब',
+    'डाळिंबाच': 'डाळिंब',
+    'डाळिंबावर': 'डाळिंब',
     'द्राक्ष': 'द्राक्षे',
     'द्राक्षे': 'द्राक्षे',
     'सूर्यफूल': 'सूर्यफूल',
-    'गहू': 'गहू'
+    'गहू': 'गहू',
+    'गव्हाच': 'गहू',
   };
 
   for (const [key, crop] of Object.entries(map)) {

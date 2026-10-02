@@ -7,10 +7,26 @@ interface SplashScreenProps {
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
-  const handleStart = () => {
+  const handleStart = async () => {
     speechService.stopSpeaking();
     speechService.hapticFeedback(50);
     speechService.playTone('confirm');
+    // Request mic permission — triggers browser prompt on Android Chrome
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      stream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    // Request camera permission
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      stream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    // Request location permission
+    try {
+      await new Promise<void>((resolve) => {
+        navigator.geolocation.getCurrentPosition(() => resolve(), () => resolve());
+      });
+    } catch (_) {}
     onStart();
   };
 

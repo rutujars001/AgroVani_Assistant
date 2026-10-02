@@ -138,17 +138,23 @@ class RealtimeDataService {
    * Real-time Gemini AI Crop Disease Diagnosis
    */
   async diagnoseCrop(params: { crop: string; symptomText?: string; imageBase64?: string }) {
-    const res = await fetch('/api/diagnose', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    });
-
-    if (!res.ok) {
-      throw new Error('AI Diagnosis request failed.');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    try {
+      const res = await fetch('/api/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('AI Diagnosis request failed.');
+      return await res.json();
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') throw new Error('वेळ संपली. इंटरनेट तपासा व पुन्हा प्रयत्न करा.');
+      throw err;
     }
-
-    return await res.json();
   }
 }
 

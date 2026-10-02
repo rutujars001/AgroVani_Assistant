@@ -19,21 +19,19 @@ export const KrushiDoctorModule: React.FC<KrushiDoctorModuleProps> = ({
   onOpenVoice,
   targetCrop = 'डाळिंब',
 }) => {
-  const [selectedCrop, setSelectedCrop] = useState<string>(targetCrop);
   const [profile, setProfile] = useState<FarmerProfile>(securityService.getProfile());
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [diagnosis, setDiagnosis] = useState<PlantixDiseaseDiagnosis | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'scanner' | 'chat'>('scanner');
 
-  // Chatbot State
   const [chatMessages, setChatMessages] = useState<DoctorChatMessage[]>([
     {
       id: 'msg-1',
       sender: 'doctor',
-      text: `नमस्कार शेतकरी मित्र! मी तुमचा डिजिटल कृषी डॉक्टर आहे. तुमच्या ${selectedCrop} पिकाच्या पानाचा फोटो अपलोड करा किंवा कोणताही रोग, खत अथवा फवारणीविषयीचा प्रश्न मला विचारा.`,
+      text: 'नमस्कार शेतकरी मित्र! मी तुमचा डिजिटल कृषी डॉक्टर आहे. पिकाच्या पानाचा फोटो अपलोड करा किंवा कोणताही रोग, खत अथवा फवारणीविषयीचा प्रश्न मला विचारा.',
       timestamp: 'आताच',
-      audioText: `नमस्कार शेतकरी मित्र! मी तुमचा डिजिटल कृषी डॉक्टर आहे. पिकाच्या पानाचा फोटो अपलोड करा किंवा प्रश्न विचारा.`
+      audioText: 'नमस्कार शेतकरी मित्र! मी तुमचा डिजिटल कृषी डॉक्टर आहे. पिकाच्या पानाचा फोटो अपलोड करा किंवा प्रश्न विचारा.'
     }
   ]);
   const [chatInput, setChatInput] = useState('');
@@ -43,10 +41,12 @@ export const KrushiDoctorModule: React.FC<KrushiDoctorModuleProps> = ({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const CROPS_LIST = [
-    'डाळिंब', 'कांदा', 'ऊस', 'ज्वारी', 'तूर',
-    'कापूस', 'हरभरा', 'गहू', 'सोयाबीन', 'टोमॅटो', 'द्राक्षे'
-  ];
+  // Request camera + mic permissions on mount
+  useEffect(() => {
+    navigator.mediaDevices?.getUserMedia({ video: true, audio: true })
+      .then(stream => stream.getTracks().forEach(t => t.stop()))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,15 +74,15 @@ export const KrushiDoctorModule: React.FC<KrushiDoctorModuleProps> = ({
 
     try {
       const result = await realtimeDataService.diagnoseCrop({
-        crop: selectedCrop,
+        crop: targetCrop,
         imageBase64: base64Image,
-        symptomText: `${selectedCrop} पिकाच्या पानावर रोग व किडीचे अचूक निदान करून उपाय सांगा`,
+        symptomText: `${targetCrop} पिकाच्या पानावर रोग व किडीचे अचूक निदान करून उपाय सांगा`,
       });
 
       if (result && result.diseaseNameMr) {
         const diagResult: PlantixDiseaseDiagnosis = {
           id: result.id || 'diag-' + Date.now(),
-          crop: selectedCrop,
+          crop: targetCrop,
           diseaseNameMr: result.diseaseNameMr,
           diseaseNameEn: result.diseaseNameEn || 'Crop Disease',
           scientificName: result.scientificName || 'Pathogen spp.',
@@ -127,7 +127,7 @@ export const KrushiDoctorModule: React.FC<KrushiDoctorModuleProps> = ({
           {
             id: 'doc-diag-' + Date.now(),
             sender: 'doctor',
-            text: `मी तुमच्या ${selectedCrop} पिकाच्या पानाचे विश्लेषण केले आहे. यात "${diagResult.diseaseNameMr}" चे ${diagResult.confidenceScore}% अचूकतेने निदान झाले आहे. खाली सविस्तर औषधे, १५ लिटर पंपासाठी प्रमाण आणि डाऊनलोडसाठी PDF अहवाल दिला आहे.`,
+            text: `मी तुमच्या ${targetCrop} पिकाच्या पानाचे विश्लेषण केले आहे. यात "${diagResult.diseaseNameMr}" चे ${diagResult.confidenceScore}% अचूकतेने निदान झाले आहे. खाली सविस्तर औषधे, १५ लिटर पंपासाठी प्रमाण आणि डाऊनलोडसाठी PDF अहवाल दिला आहे.`,
             timestamp: 'आताच',
             diagnosis: diagResult,
             audioText: diagResult.audioSummary
@@ -170,29 +170,32 @@ export const KrushiDoctorModule: React.FC<KrushiDoctorModuleProps> = ({
     setIsDoctorTyping(true);
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
       const res = await fetch('/api/krushi-doctor/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userText,
-          currentCrop: selectedCrop,
+          currentCrop: targetCrop,
           currentDiagnosis: diagnosis,
-        })
+        }),
+        signal: controller.signal,
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        const docReply: DoctorChatMessage = {
-          id: 'doc-' + Date.now(),
-          sender: 'doctor',
-          text: data.reply,
-          timestamp: new Date().toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit' }),
-          audioText: data.audioText
-        };
-        setChatMessages(prev => [...prev, docReply]);
-        speechService.playTone('confirm');
-        speechService.speak(data.audioText || data.reply);
-      }
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data = await res.json();
+      if (!data.reply) throw new Error('Empty reply');
+      const docReply: DoctorChatMessage = {
+        id: 'doc-' + Date.now(),
+        sender: 'doctor',
+        text: data.reply,
+        timestamp: new Date().toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit' }),
+        audioText: data.audioText
+      };
+      setChatMessages(prev => [...prev, docReply]);
+      speechService.playTone('confirm');
+      speechService.speak(data.audioText || data.reply);
     } catch {
       setChatMessages(prev => [
         ...prev,
@@ -273,29 +276,6 @@ export const KrushiDoctorModule: React.FC<KrushiDoctorModuleProps> = ({
           <MessageSquare className="w-4 h-4" />
           <span>डॉक्टर चॅटबॉट (AI Doctor)</span>
         </button>
-      </div>
-
-      {/* Crop Selector Bar */}
-      <div className="mb-3">
-        <label className="text-xs font-bold text-stone-700 mb-1 block">तपासणीसाठी पीक निवडा:</label>
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {CROPS_LIST.map((crop) => (
-            <button
-              key={crop}
-              onClick={() => {
-                setSelectedCrop(crop);
-                speechService.hapticFeedback(20);
-              }}
-              className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ${
-                selectedCrop === crop
-                  ? 'bg-rose-700 text-white shadow-2xs'
-                  : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
-              }`}
-            >
-              {crop}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* TAB 1: SCANNER & DETAILED DIAGNOSIS */}

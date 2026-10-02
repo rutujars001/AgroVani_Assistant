@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AndroidFrame } from './components/AndroidFrame';
+import { CropCalendarWidget } from './components/CropCalendarWidget';
 import { SplashScreen } from './components/modules/SplashScreen';
 import { HomeDashboard } from './components/modules/HomeDashboard';
 import { CropInfoModule } from './components/modules/CropInfoModule';
@@ -21,7 +22,7 @@ import { FarmerProfile } from './types';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<
-    'splash' | 'home' | 'crops' | 'weather' | 'mandi' | 'schemes' | 'doctor' | 'myfarm' | 'auth' | 'finance' | 'soil' | 'mandicomparison'
+    'splash' | 'home' | 'crops' | 'weather' | 'mandi' | 'schemes' | 'doctor' | 'myfarm' | 'auth' | 'finance' | 'soil' | 'mandicomparison' | 'calendar'
   >('splash');
 
   const [selectedTaluka, setSelectedTaluka] = useState('पंढरपूर');
@@ -61,7 +62,7 @@ export default function App() {
         setCurrentScreen('myfarm');
         break;
       case 'crop_calendar':
-        setCurrentScreen('home');
+        setCurrentScreen('calendar');
         break;
       case 'farm_finance':
         setCurrentScreen('finance');
@@ -114,7 +115,7 @@ export default function App() {
         <HomeDashboard
           profile={profile}
           onOpenVoice={() => setIsVoiceOpen(true)}
-          onSelectModule={(mod) => setCurrentScreen(mod)}
+          onSelectModule={(mod) => setCurrentScreen(mod as any)}
           onOpenSensitiveData={() => setIsSensitiveOpen(true)}
           selectedTaluka={selectedTaluka}
           onSelectTaluka={setSelectedTaluka}
@@ -198,6 +199,25 @@ export default function App() {
           profile={profile}
           onBack={() => setCurrentScreen('home')}
         />
+      )}
+
+      {currentScreen === 'calendar' && (
+        <div className="flex-1 flex flex-col p-4 bg-stone-50 overflow-y-auto">
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              onClick={() => setCurrentScreen('home')}
+              className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 cursor-pointer active:scale-95"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H19v-2z" /></svg>
+            </button>
+            <h2 className="text-base font-extrabold text-stone-900">पीक दिनदर्शिका</h2>
+          </div>
+          <CropCalendarWidget
+            profile={profile}
+            onOpenDoctorCheck={(crop) => { setTargetCropParam(crop); setCurrentScreen('doctor'); }}
+            onOpenMyFarm={() => setCurrentScreen('myfarm')}
+          />
+        </div>
       )}
 
       {currentScreen === 'mandicomparison' && (

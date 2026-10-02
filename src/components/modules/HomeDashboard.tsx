@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, Shield, MapPin, Volume2, CloudSun, TrendingUp, FileText, Stethoscope, Sprout, Sparkles, User, Radio, Camera, Wallet, FlaskConical, Scale } from 'lucide-react';
+import { Mic, Shield, MapPin, Volume2, CloudSun, TrendingUp, FileText, Stethoscope, Sprout, Sparkles, User, Radio, Camera, Wallet, FlaskConical, Scale, Calendar } from 'lucide-react';
 import { speechService } from '../../services/speechService';
 import { SOLAPUR_TALUKAS } from '../../data/agriculturalData';
 import { OfflineSyncBadge } from '../OfflineSyncBadge';
@@ -7,12 +7,10 @@ import { PWAInstallButton } from '../PWAInstallButton';
 import { realtimeDataService } from '../../services/realtimeDataService';
 import { FarmerProfile } from '../../types';
 import { securityService } from '../../services/securityService';
-import { CropCalendarWidget } from '../CropCalendarWidget';
-import { EarlyWarningBanner } from '../EarlyWarningBanner';
 
 interface HomeDashboardProps {
   onOpenVoice: () => void;
-  onSelectModule: (module: 'crops' | 'weather' | 'mandi' | 'schemes' | 'doctor' | 'myfarm' | 'auth' | 'finance' | 'soil' | 'mandicomparison') => void;
+  onSelectModule: (module: 'crops' | 'weather' | 'mandi' | 'schemes' | 'doctor' | 'myfarm' | 'auth' | 'finance' | 'soil' | 'mandicomparison' | 'calendar') => void;
   onOpenSensitiveData: () => void;
   selectedTaluka: string;
   onSelectTaluka: (taluka: string) => void;
@@ -43,7 +41,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   }, [selectedTaluka, propProfile]);
 
   // Clean, fast navigation with NO starter speech lag
-  const handleCardClick = (module: 'crops' | 'weather' | 'mandi' | 'schemes' | 'doctor' | 'myfarm' | 'auth' | 'finance' | 'soil' | 'mandicomparison') => {
+  const handleCardClick = (module: 'crops' | 'weather' | 'mandi' | 'schemes' | 'doctor' | 'myfarm' | 'auth' | 'finance' | 'soil' | 'mandicomparison' | 'calendar') => {
     speechService.stopSpeaking();
     speechService.hapticFeedback(30);
     onSelectModule(module);
@@ -141,9 +139,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </span>
       </div>
 
-      {/* Early Warning Weather Hazard & Disease Outbreak Alert Banner */}
-      <EarlyWarningBanner />
-
       {/* Central Prominent Voice Input Button */}
       <div className="my-2 flex flex-col items-center justify-center text-center">
         <div className="relative group">
@@ -185,16 +180,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         </button>
       </div>
 
-      {/* Crop Calendar Feature - Daily farming tasks based on primary crop growth cycles */}
-      <CropCalendarWidget
-        profile={profile}
-        onOpenDoctorCheck={onDoctorCheckCrop}
-        onOpenMyFarm={() => handleCardClick('myfarm')}
-      />
-
-      {/* 6 Color-Coded Feature Cards (Khat Ganak completely removed, replaced by My Farm & Krushi Doctor) */}
+      {/* 6 Color-Coded Feature Cards */}
       <div className="grid grid-cols-2 gap-3 pb-3">
-        {/* 1. Krushi Doctor (कृषी डॉक्टर & Plantix Scanner) - Rose / Crimson */}
+        {/* 1. Krushi Doctor */}
         <button
           onClick={() => handleCardClick('doctor')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-rose-100/80 hover:bg-rose-100 border-2 border-rose-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center col-span-2 relative overflow-hidden"
@@ -215,7 +203,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
         </button>
 
-        {/* 2. My Farm (माझे शेत - Plantix Personalization) - Teal / Emerald */}
+        {/* 2. My Farm */}
         <button
           onClick={() => handleCardClick('myfarm')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-teal-100/70 hover:bg-teal-100 border-2 border-teal-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -227,7 +215,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <span className="text-[10px] text-teal-800 mt-0.5">वैयक्तिक पिके व जोखीम</span>
         </button>
 
-        {/* 3. Crop Information (पीक माहिती) - Emerald */}
+        {/* 3. Crop Information */}
         <button
           onClick={() => handleCardClick('crops')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-emerald-100/70 hover:bg-emerald-100 border-2 border-emerald-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -239,7 +227,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <span className="text-[10px] text-emerald-800 mt-0.5">१२ स्थानिक पिके</span>
         </button>
 
-        {/* 4. Weather (थेट हवामान) - Sky Blue */}
+        {/* 4. Weather */}
         <button
           onClick={() => handleCardClick('weather')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-sky-100/70 hover:bg-sky-100 border-2 border-sky-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -254,7 +242,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <span className="text-[10px] text-sky-800 mt-0.5">उपग्रह लाइव्ह डेटा</span>
         </button>
 
-        {/* 5. Mandi Prices (थेट बाजारभाव) - Purple / Violet */}
+        {/* 5. Mandi Prices */}
         <button
           onClick={() => handleCardClick('mandi')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-purple-100/70 hover:bg-purple-100 border-2 border-purple-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -269,7 +257,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <span className="text-[10px] text-purple-800 mt-0.5">सोलापूर APMC लाइव्ह</span>
         </button>
 
-        {/* 6. Government Schemes (योजना) - Amber / Yellow */}
+        {/* 6. Government Schemes */}
         <button
           onClick={() => handleCardClick('schemes')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-amber-100/70 hover:bg-amber-100 border-2 border-amber-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center col-span-2"
@@ -285,7 +273,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           </div>
         </button>
 
-        {/* 7. Farm Finance Tracker (जमा-खर्च वही) - Emerald / Green */}
+        {/* 7. Farm Finance */}
         <button
           onClick={() => handleCardClick('finance')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-emerald-100/80 hover:bg-emerald-100 border-2 border-emerald-400 shadow-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -297,7 +285,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <span className="text-[10px] text-emerald-800 mt-0.5">व्हॉइस शेती नफा-तोटा</span>
         </button>
 
-        {/* 8. Soil Health Card (माती परीक्षण व स्मार्ट खत) - Indigo / Blue */}
+        {/* 8. Soil Health */}
         <button
           onClick={() => handleCardClick('soil')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-indigo-100/70 hover:bg-indigo-100 border-2 border-indigo-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center"
@@ -309,7 +297,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
           <span className="text-[10px] text-indigo-800 mt-0.5">स्मार्ट खत प्रिस्क्रिप्शन</span>
         </button>
 
-        {/* 9. Mandi Price Comparison & Alerts - Amber / Orange */}
+        {/* 9. Mandi Comparison */}
         <button
           onClick={() => handleCardClick('mandicomparison')}
           className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-orange-100/80 hover:bg-orange-100 border-2 border-orange-300 shadow-xs cursor-pointer active:scale-95 transition-all text-center col-span-2"
@@ -321,6 +309,22 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             <div className="text-left">
               <span className="text-sm font-extrabold text-orange-950">बाजारभाव तुलना व नफा सल्ला (Multi-Mandi)</span>
               <p className="text-[11px] text-orange-900">सोलापूर, पंढरपूर, बार्शी तुलना • वाहतूक वजा जाता सर्वाधिक निव्वळ भाव</p>
+            </div>
+          </div>
+        </button>
+
+        {/* 10. Crop Calendar - new dedicated tab */}
+        <button
+          onClick={() => handleCardClick('calendar')}
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-green-100/80 hover:bg-green-100 border-2 border-green-400 shadow-xs cursor-pointer active:scale-95 transition-all text-center col-span-2"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center shadow-sm">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <span className="text-sm font-extrabold text-green-950">पीक दिनदर्शिका (Crop Calendar)</span>
+              <p className="text-[11px] text-green-900">दैनिक शेतकामे, वाढीचे टप्पे व वेळापत्रक</p>
             </div>
           </div>
         </button>
